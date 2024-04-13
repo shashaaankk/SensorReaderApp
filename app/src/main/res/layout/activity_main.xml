@@ -23,35 +23,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Ambient Light Sensor"
-            android:textColor="#0E0E0E" />
-
-        <EditText
-            android:id="@+id/editTextTextMultiLine"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FFFFFF"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:paddingRight="10dp"
-            android:text="Cover the ambient light sensor (Ususally housed in the front facing camera) to adjust illuminance"
-            android:textColor="#7E7A7A"
-            android:textSize="14sp" />
+            android:textColor="#2196F3" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/multilineTextView"
             android:layout_width="match_parent"
-            android:layout_height="67dp"
-            android:background="#BCB4B4"
-            android:backgroundTint="#CAC6C6"
-            android:text=" 1 lx" />
+            android:layout_height="wrap_content"
+            android:text="Cover the ambient light sensor (Ususally housed in the front facing camera) to adjust illuminance"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:background="#ECECEC"
+            android:textColor="#333"
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="8dp"
+            android:scrollbars="vertical"/>
+
+        <TextView
+            android:id="@+id/textView_sensorVal"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:background="#FFFFFF"
+            android:backgroundTint="#FFFFFF"
+            android:text="ILLUMINANCE: 1lx"
+            android:textColor="#010E13" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="20dp"
+            android:paddingBottom="5dp"
             android:text="Set Threshold Value:"
-            android:textColor="#0E0E0E" />
+            android:textColor="#03A9F4" />
+
+        <TextView
+            android:id="@+id/textView_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:background="#FFFFFF"
+            android:backgroundTint="#FFFFFF"
+            android:text="THRESHOLD: 1lx"
+            android:textColor="#001119" />
 
         <SeekBar
             android:id="@+id/seekBar_threshold"
@@ -59,20 +83,43 @@
             android:layout_height="wrap_content"
             android:max="100"
             android:progress="1"
+            android:padding="16dp"
+            android:layout_margin="8dp"
             android:paddingTop="30dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="20dp"
+            android:paddingBottom="5dp"
             android:text="Set Period:"
-            android:textColor="#0E0E0E" />
+            android:textColor="#03A9F4" />
+
+        <TextView
+            android:id="@+id/textView_period"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeStepGranularity="2sp"
+            android:autoSizeTextType="uniform"
+            android:background="#BCB4B4"
+            android:backgroundTint="#FFFEFE"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:text="PERIOD: 1 s"
+            android:textColor="#000B10" />
+
 
         <SeekBar
             android:id="@+id/seekBar_period"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="30dp" />
+            android:max="100"
+            android:progress="1"
+            android:paddingTop="30dp"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
 
     </LinearLayout>
 
