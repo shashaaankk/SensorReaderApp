@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
     android:paddingTop="10dp"
-    tools:context=".MainActivity">
+    tools:context=".SecondActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ambient Light Sensor"
+            android:text="Magnetic Sensor"
             android:textColor="#2196F3" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:lineSpacingExtra="8dp"
             android:padding="16dp"
             android:scrollbars="vertical"
-            android:text="Cover the ambient light sensor (Ususally housed in the front facing camera) to adjust illuminance"
+            android:text="Natural disturbances in Earth's magnetic field"
             android:textColor="#333"
             android:textSize="16sp" />
 
@@ -50,7 +50,7 @@
             android:background="#FFFFFF"
             android:backgroundTint="#FFFFFF"
             android:padding="16dp"
-            android:text="ILLUMINANCE: 1lx"
+            android:text="INTENSITY: 1T"
             android:textColor="#010E13" />
 
         <TextView
@@ -73,7 +73,7 @@
             android:background="#FFFFFF"
             android:backgroundTint="#FFFFFF"
             android:padding="16dp"
-            android:text="THRESHOLD: 1lx"
+            android:text="THRESHOLD: 1T"
             android:textColor="#001119" />
 
         <SeekBar
@@ -121,10 +121,10 @@
             android:progress="1" />
 
         <Button
-            android:id="@+id/first_activity_button"
+            android:id="@+id/second_activity_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Go to Magnetic Sensor" />
+            android:text="Go to Luminous Sensor" />
 
     </LinearLayout>
 
