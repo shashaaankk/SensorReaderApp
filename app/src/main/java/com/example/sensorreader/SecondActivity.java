@@ -27,7 +27,7 @@ public class SecondActivity extends AppCompatActivity {
     private Button buttonpreviousActivity;
     private SensorManager sensorManager;
     private Sensor lightSensor;
-    private Sensor magnetometer;
+    private Sensor accelerometer;
     private int threshold = 1; // Default threshold
 
     public static final int TYPE_LIGHT =0;
@@ -98,15 +98,19 @@ public class SecondActivity extends AppCompatActivity {
     }
     private void setupSensors() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        if(magnetometer == null){
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if(accelerometer == null){
             Toast.makeText(this, "Device has no light sensor!", Toast.LENGTH_SHORT).show();
         }
 
-        SensorEventListener sensorEventListenerMagnetometer = new SensorEventListener() {
+        SensorEventListener sensorEventListenerAccelerometer = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                display_sensVal.setText("Magnetic Field = " + event.values[0] + " uT");
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                {
+                    display_sensVal.setText("X:  " + event.values[0] + "| Y:  "+event.values[1] + "| Z:  "+event.values[2] +"m/s^2");
+                }
+
             }
 
             @Override
@@ -114,7 +118,7 @@ public class SecondActivity extends AppCompatActivity {
 
             }
         };
-        sensorManager.registerListener(sensorEventListenerMagnetometer, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(sensorEventListenerAccelerometer, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
     @Override
     protected void onResume() {
