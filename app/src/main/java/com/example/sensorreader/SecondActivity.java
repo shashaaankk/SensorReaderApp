@@ -27,6 +27,7 @@ public class SecondActivity extends AppCompatActivity {
     private Button buttonpreviousActivity;
     private SensorManager sensorManager;
     private Sensor lightSensor;
+    private Sensor magnetometer;
     private int threshold = 1; // Default threshold
 
     public static final int TYPE_LIGHT =0;
@@ -40,6 +41,7 @@ public class SecondActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            setupSensors();
             return insets;
         });
 
@@ -96,35 +98,29 @@ public class SecondActivity extends AppCompatActivity {
     }
     private void setupSensors() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        if(lightSensor == null){
-            Toast.makeText(this, "Device has no magnetic sensor!", Toast.LENGTH_SHORT).show();
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if(magnetometer == null){
+            Toast.makeText(this, "Device has no light sensor!", Toast.LENGTH_SHORT).show();
         }
-    }
 
+        SensorEventListener sensorEventListenerMagnetometer = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                display_sensVal.setText("Magnetic Field = " + event.values[0] + " uT");
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+            }
+        };
+        sensorManager.registerListener(sensorEventListenerMagnetometer, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
     @Override
     protected void onResume() {
         super.onResume();
         if (lightSensor != null) {
             sensorManager.registerListener((SensorEventListener) this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
-    }
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            float lux = event.values[0];
-            updateLightSensorDisplay(lux);
-        }
-    }
-
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Implement this if necessary
-    }
-    private void updateLightSensorDisplay(float lux) {
-        if (lux >= threshold) {
-            display_sensVal.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-        } else {
-            display_sensVal.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-        }
-        display_sensVal.setText("Current Light Level: " + lux + " lx\nThreshold: " + threshold +"lx");
     }
 }

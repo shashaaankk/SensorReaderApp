@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             setupSensors();
-
             return insets;
         });
 
@@ -98,13 +97,10 @@ public class MainActivity extends AppCompatActivity {
     private void setupSensors() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         if(lightSensor == null){
             Toast.makeText(this, "Device has no light sensor!", Toast.LENGTH_SHORT).show();
         }
-        else if(magnetometer == null){
-            Toast.makeText(this, "Device has no Magnetometer!", Toast.LENGTH_SHORT).show();
-        }
+
         SensorEventListener sensorEventListenerLight = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
