@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private int threshold = 1; // Default threshold
 
     public static final int TYPE_LIGHT =0;
+    private SensorEventListener sensorEventListenerLight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
             setupSensors();
             return insets;
         });
@@ -72,7 +74,25 @@ public class MainActivity extends AppCompatActivity {
         seekBarPeriod.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                display_period.setText("Period: " + progress + "s");
+                int sensorPeriod = progress + 200;
+                display_period.setText("Period: " + sensorPeriod + "ms");
+                //Period goes from 200ms to 1000ms
+                if (fromUser)
+                {
+                  updateSensorPeriod(sensorPeriod);
+                }
+            }
+
+            private void updateSensorPeriod(int period) {
+                // Unregister the existing sensor listener
+                if (lightSensor != null) {
+                    sensorManager.unregisterListener(sensorEventListenerLight, lightSensor);
+                }
+                // Re-register the listener with the new period
+                int delay = period * 1000;  // Convert ms to microseconds as needed by Android sensors
+                if (lightSensor != null) {
+                    sensorManager.registerListener(sensorEventListenerLight, lightSensor, delay);
+                }
             }
 
             @Override
@@ -95,13 +115,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     private void setupSensors() {
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        //sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         if(lightSensor == null){
             Toast.makeText(this, "Device has no light sensor!", Toast.LENGTH_SHORT).show();
         }
 
         SensorEventListener sensorEventListenerLight = new SensorEventListener() {
+
             @Override
             public void onSensorChanged(SensorEvent event) {
                 display_sensVal.setText("Illuminance = " + event.values[0] + " lx");
