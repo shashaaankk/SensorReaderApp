@@ -81,10 +81,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:max="100"
+            android:max="10"
             android:padding="16dp"
             android:paddingTop="30dp"
-            android:progress="1" />
+            android:progress="0" />
 
         <TextView
             android:layout_width="match_parent"
@@ -106,7 +106,7 @@
             android:background="#BCB4B4"
             android:backgroundTint="#FFFEFE"
             android:padding="16dp"
-            android:text="PERIOD: 1 s"
+            android:text="PERIOD: 200ms"
             android:textColor="#000B10" />
 
 
@@ -115,16 +115,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:max="100"
+            android:max="800"
             android:padding="16dp"
             android:paddingTop="30dp"
-            android:progress="1" />
+            android:progress="0" />
 
         <Button
             android:id="@+id/first_activity_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Go to Magnetic Sensor" />
+            android:text="Go to Accelerometer" />
 
     </LinearLayout>
 
