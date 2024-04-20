@@ -7,109 +7,123 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Button;
-import android.content.Intent;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.hardware.lights.Light;
-import android.hardware.GeomagneticField.*;
 import android.widget.Toast;
-
+import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener{
 
-    private TextView display_sensVal, display_period, display_threshold;   // TextView to display the sensor Values
-    private SeekBar seekBarPeriod;
-    private Button buttonnextActivity;
+    private TextView display_sensVal;
+    private TextView display_period;
     private SensorManager sensorManager;
-    private Sensor lightSensor;
-    private int threshold = 30; // Default threshold
+    private Sensor accelerometer;
+    private Timer periodicTimer;
+    private TimerTask task_processor;
+    final private double threshold = 5.0; // Default threshold
+    //private SensorEventListener sensorEventListenerAccelerometer;
+    private int sensorPeriod = 200;       // Default 1ms*
+    private boolean sensorListnerRegistered;
+    private double prev_roundedz;
 
-    public static final int TYPE_LIGHT =0;
-    private SensorEventListener sensorEventListenerLight;
+    public MainActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-            setupSensors();
             return insets;
         });
 
-        display_period  = (TextView) findViewById(R.id.textView_period);
-        seekBarPeriod = (SeekBar) findViewById(R.id.seekBar_period);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);          //Sensor Manager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER); //Sensor
+        display_sensVal  = findViewById(R.id.textView_sensorVal);                  //Display
 
-        display_threshold  = (TextView) findViewById(R.id.textView_threshold);
-        display_threshold.setText("Threshold: " + threshold + " lx");
+        display_period  = findViewById(R.id.textView_period);                      //Display
+        SeekBar seekBarPeriod = findViewById(R.id.seekBar_period);                 //Period adjusted with seek bar
+        seekBarPeriod.setMax(4);                                                  //*
+        periodicTimer = new Timer();                                               //Initialization of Timer
+        task_processor = periodicValCheck();                                       //Initialization of Timer Task
 
-        display_sensVal  = (TextView) findViewById(R.id.textView_sensorVal);
+        TextView display_threshold = findViewById(R.id.textView_threshold);        //Display Pre-Set Threshold
+        display_threshold.setText("Threshold: " + threshold + " m/s^2");
 
-        buttonnextActivity = (Button) findViewById(R.id.first_activity_button);
-
-        // for period
+        // for setting period
         seekBarPeriod.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int sensorPeriod = progress;
-                display_period.setText("Period: " + sensorPeriod + "ms");
 
+                sensorPeriod = (progress+1)*1000;                                 //ms; +1 added to prevent 0 period
+                display_period.setText("Period: " + sensorPeriod + "ms");         //Display
+                // Reschedule the timer task
+                task_processor.cancel();                                          // Cancel the current task
+                task_processor = periodicValCheck();                              // Create a new task
+                periodicTimer.schedule(task_processor, 200, sensorPeriod);    // Schedule with new period
             }
-
-
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //functionality when the user starts touching the SeekBar
-            }
-
+            public void onStartTrackingTouch(SeekBar seekBar) { }
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //functionality when the user stops touching the SeekBar
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
-        // Add_button add clicklistener
-        buttonnextActivity.setOnClickListener(v -> {
-            // Intents are objects of the android.content.Intent type. Your code can send them to the Android system defining
-            // the components you are targeting. Intent to start an activity called SecondActivity with the following code.
-            Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-            // start the activity connect to the specified class
-            startActivity(intent);
-        });
-    }
-    private void setupSensors() {
-        //sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        if(lightSensor == null){
-            Toast.makeText(this, "Device has no light sensor!", Toast.LENGTH_SHORT).show();
-        }
-
-        SensorEventListener sensorEventListenerLight = new SensorEventListener() {
-
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-                display_sensVal.setText("Illuminance = " + event.values[0] + " lx");
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-            }
-        };
-        sensorManager.registerListener(sensorEventListenerLight, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (lightSensor != null) {
-            sensorManager.registerListener((SensorEventListener) this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    protected void onStart(){
+        super.onStart();
+        prev_roundedz = 0.0;
+        if (sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)){
+            sensorListnerRegistered = true;
+            periodicTimer = new Timer();                                    // Reinitialize the timer
+            task_processor = periodicValCheck();                            // Reinitialize the task
+            periodicTimer.schedule(task_processor, 200, sensorPeriod);  // Start the timer with period = sensorPeriod
         }
+        else {
+            Toast.makeText(this, "Sensor Listener could not be registered!", Toast.LENGTH_SHORT).show();
+        }
+    }
+    @Override
+    protected  void onStop() {
+        super.onStop();
+        if(sensorListnerRegistered){
+            sensorManager.unregisterListener(this);
+        }
+        if (task_processor != null) {
+            task_processor.cancel();                                          //timer task is cancelled to avoid leaks
+        }
+        periodicTimer.cancel();                                               // Cancel the entire timer
+    }
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float roundedx = Math.round(event.values[0] * 100.0f) / 100.0f;
+        float roundedy = Math.round(event.values[1] * 100.0f) / 100.0f;
+        float roundedz = Math.round(event.values[2] * 100.0f) / 100.0f;
+        prev_roundedz = roundedz;
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            display_sensVal.setText("X:  " + roundedx + "| Y:  " + roundedy + "| Z:  " + roundedz + " m/s^2");
+        }
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) { }
+
+    private TimerTask periodicValCheck() {
+        return new TimerTask() {
+            @Override
+            public void run() {  //periodically check if the threshold is exceeded
+                if (Math.abs(prev_roundedz) < threshold) {
+                    for(int i=0; i<1000; i++) {
+                        display_sensVal.setText("Threshold Exceeded!");
+                    }
+                }
+            }
+        };
     }
 }
