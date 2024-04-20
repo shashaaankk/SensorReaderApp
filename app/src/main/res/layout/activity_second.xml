@@ -96,9 +96,8 @@
             android:background="#BCB4B4"
             android:backgroundTint="#FFFEFE"
             android:padding="16dp"
-            android:text="PERIOD: 1 s"
+            android:text="Period: 1us"
             android:textColor="#000B10" />
-
 
         <SeekBar
             android:id="@+id/seekBar_period"

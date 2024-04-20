@@ -18,16 +18,16 @@ import android.hardware.lights.Light;
 import android.hardware.GeomagneticField.*;
 import android.widget.Toast;
 
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView display_sensVal, display_period, display_threshold;   // TextView to display the sensor Values
-    private SeekBar seekBarThreshold;   // SeekBar for adjusting the threshold
     private SeekBar seekBarPeriod;
     private Button buttonnextActivity;
     private SensorManager sensorManager;
     private Sensor lightSensor;
-    private Sensor magnetometer;
-    private int threshold = 1; // Default threshold
+    private int threshold = 30; // Default threshold
 
     public static final int TYPE_LIGHT =0;
     private SensorEventListener sensorEventListenerLight;
@@ -46,54 +46,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
         display_period  = (TextView) findViewById(R.id.textView_period);
+        seekBarPeriod = (SeekBar) findViewById(R.id.seekBar_period);
+
         display_threshold  = (TextView) findViewById(R.id.textView_threshold);
+        display_threshold.setText("Threshold: " + threshold + " lx");
+
         display_sensVal  = (TextView) findViewById(R.id.textView_sensorVal);
 
-        seekBarThreshold = (SeekBar) findViewById(R.id.seekBar_threshold);
-        seekBarPeriod = (SeekBar) findViewById(R.id.seekBar_period);
         buttonnextActivity = (Button) findViewById(R.id.first_activity_button);
 
-        // for the threshold
-        seekBarThreshold.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                display_threshold.setText("Threshold: " + progress + " lx");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //functionality when the user starts touching the SeekBar
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //functionality when the user stops touching the SeekBar
-            }
-        });
         // for period
         seekBarPeriod.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int sensorPeriod = progress + 200;
+                int sensorPeriod = progress;
                 display_period.setText("Period: " + sensorPeriod + "ms");
-                //Period goes from 200ms to 1000ms
-                if (fromUser)
-                {
-                  updateSensorPeriod(sensorPeriod);
-                }
+
             }
 
-            private void updateSensorPeriod(int period) {
-                // Unregister the existing sensor listener
-                if (lightSensor != null) {
-                    sensorManager.unregisterListener(sensorEventListenerLight, lightSensor);
-                }
-                // Re-register the listener with the new period
-                int delay = period * 1000;  // Convert ms to microseconds as needed by Android sensors
-                if (lightSensor != null) {
-                    sensorManager.registerListener(sensorEventListenerLight, lightSensor, delay);
-                }
-            }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
