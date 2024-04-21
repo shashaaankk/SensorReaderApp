@@ -3,6 +3,7 @@ package com.example.sensorreader;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    //Initializing Broadcasting
+        IntentFilter filter = new IntentFilter("com.example.broadcast.MY_NOTIFICATION");
+        registerReceiver(sensorUpdates, filter);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);          //Sensor Manager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER); //Sensor
