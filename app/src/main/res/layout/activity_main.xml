@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="10dp"
-    android:paddingTop="10dp"
+    android:paddingTop="20dp"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ambient Light Sensor"
+            android:text="Accelerometer"
             android:textColor="#2196F3" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:lineSpacingExtra="8dp"
             android:padding="16dp"
             android:scrollbars="vertical"
-            android:text="Cover the ambient light sensor (Ususally housed in the front facing camera) to adjust illuminance"
+            android:text="Flip the phone to visalize the change in acceleration due to gravity along x, y and z. Currently configured for z only"
             android:textColor="#333"
             android:textSize="16sp" />
 
@@ -50,7 +50,7 @@
             android:background="#FFFFFF"
             android:backgroundTint="#FFFFFF"
             android:padding="16dp"
-            android:text="ILLUMINANCE: 1lx"
+            android:text="Accelerometer Readings!"
             android:textColor="#010E13" />
 
         <TextView
@@ -73,18 +73,8 @@
             android:background="#FFFFFF"
             android:backgroundTint="#FFFFFF"
             android:padding="16dp"
-            android:text="THRESHOLD: 1lx"
+            android:text="Threshold:5m/s^2"
             android:textColor="#001119" />
-
-        <SeekBar
-            android:id="@+id/seekBar_threshold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:max="10"
-            android:padding="16dp"
-            android:paddingTop="30dp"
-            android:progress="0" />
 
         <TextView
             android:layout_width="match_parent"
@@ -106,25 +96,24 @@
             android:background="#BCB4B4"
             android:backgroundTint="#FFFEFE"
             android:padding="16dp"
-            android:text="PERIOD: 200ms"
+            android:text="Period: 1s"
             android:textColor="#000B10" />
-
 
         <SeekBar
             android:id="@+id/seekBar_period"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:max="800"
+            android:max="100"
             android:padding="16dp"
             android:paddingTop="30dp"
-            android:progress="0" />
+            android:progress="1" />
 
         <Button
-            android:id="@+id/first_activity_button"
+            android:id="@+id/second_activity_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Go to Accelerometer" />
+            android:text="Go to Luminous Sensor" />
 
     </LinearLayout>
 
