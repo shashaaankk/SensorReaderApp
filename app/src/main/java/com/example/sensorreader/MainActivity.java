@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Intent intent = new Intent(MainActivity.this, LightSensActivity.class);
             startActivity(intent);
         });
+        startService(new Intent(this,SensorService.class));
     }
     @Override
     protected void onStart(){
