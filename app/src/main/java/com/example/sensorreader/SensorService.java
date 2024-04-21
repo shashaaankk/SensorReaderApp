@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -19,12 +20,13 @@ import java.util.TimerTask;
 
 public class SensorService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
-    private float gyro_z = 0;
-    private Sensor accelerometer;
+    private Intent broadcastIntent;
+    private float sensorVal = 0;
+    private Sensor accelerometer,lightsensor;
     private Timer periodicTimer;
     private int sensorPeriod = 5000;
     private TimerTask task_processor;
-    private final double threshold = 5.0; // Threshold
+    private double threshold = 5.0; // Threshold
     private NotificationManager notificationManager;
 
     @Override
@@ -32,17 +34,25 @@ public class SensorService extends Service implements SensorEventListener {
         super.onCreate();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        lightsensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         periodicTimer = new Timer();
         task_processor = periodicValCheck();
-        periodicTimer.schedule(task_processor, 200, sensorPeriod); // delay is initial delay
+        broadcastIntent = new Intent();
+        broadcastIntent.setAction("com.example.broadcast.THRESHOLD");
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //startForeground(1, getNotification("Monitoring accelerometer..."));
+        sensorPeriod = intent.getIntExtra("sensorPeriod",5000);
+        threshold = intent.getIntExtra("threshold",5);
+        if(intent.getIntExtra("type",0)==0)
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        else
+            sensorManager.registerListener(this, lightsensor, SensorManager.SENSOR_DELAY_NORMAL);
         notificationManager.createNotificationChannel(new NotificationChannel("channel_id","gyro_id",NotificationManager.IMPORTANCE_DEFAULT));
-        getNotification("Monitoring accelerometer...");
+        periodicTimer.schedule(task_processor, 200, sensorPeriod); // delay is initial delay
         return START_STICKY;
     }
 
@@ -58,8 +68,12 @@ public class SensorService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            gyro_z = event.values[2];
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                sensorVal = event.values[2];
             //Log.d("changingService", " z: "+z);
+            else if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
+                sensorVal = event.values[0];
+            }
         }
     }
 
@@ -85,9 +99,11 @@ public class SensorService extends Service implements SensorEventListener {
         return new TimerTask() {
             @Override
             public void run() {  //periodically check if the threshold is exceeded
-                if (Math.abs(gyro_z) < threshold) {
-                    Log.d("tests", "run: "+gyro_z);
-                    notificationManager.notify(2, getNotification("Threshold exceeded! "+gyro_z));
+                if (Math.abs(sensorVal) > threshold) {
+                    Log.d("tests", "run: "+sensorVal);
+                    notificationManager.notify(2, getNotification("Threshold exceeded! "+sensorVal));
+                    broadcastIntent.putExtra("values",sensorVal);
+                    sendBroadcast(broadcastIntent);
                 }
             }
         };

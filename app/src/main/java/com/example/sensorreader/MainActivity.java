@@ -1,5 +1,7 @@
 package com.example.sensorreader;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -24,15 +26,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView display_period;
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private Timer periodicTimer;
-    private TimerTask task_processor;
     final private double threshold = 5.0; // Default threshold
-    //private SensorEventListener sensorEventListenerAccelerometer;
     private int sensorPeriod = 200;       // Default 1ms*
     private boolean sensorListnerRegistered;
     private double prev_roundedz;
     private Button second_activity_button;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         display_period  = findViewById(R.id.textView_period);                      //Display
         SeekBar seekBarPeriod = findViewById(R.id.seekBar_period);                 //Period adjusted with seek bar
         seekBarPeriod.setMax(4);                                                   //*
-        periodicTimer = new Timer();                                               //Initialization of Timer
-        task_processor = periodicValCheck();                                       //Initialization of Timer Task
+        //periodicTimer = new Timer();                                               //Initialization of Timer
+        //task_processor = periodicValCheck();                                       //Initialization of Timer Task
 
         TextView display_threshold = findViewById(R.id.textView_threshold);        //Display Pre-Set Threshold
         display_threshold.setText("Threshold: " + threshold + " m/s^2");
@@ -68,10 +66,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 sensorPeriod = (progress+1)*1000;                                 //ms; +1 added to prevent 0 period
                 display_period.setText("Period: " + sensorPeriod + "ms");         //Display
+                StartService(sensorPeriod, (int)threshold);
                 // Reschedule the timer task
-                task_processor.cancel();                                          // Cancel the current task
-                task_processor = periodicValCheck();                              // Create a new task
-                periodicTimer.schedule(task_processor, 200, sensorPeriod);  // Schedule with new period
+                //task_processor.cancel();                                        // Cancel the current task
+                //task_processor = periodicValCheck();                        // Create a new task
+                //periodicTimer.schedule(task_processor, 200, sensorPeriod);  // Schedule with new period
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) { }
@@ -80,10 +79,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         //Second page
         second_activity_button.setOnClickListener(v -> {
+            if(serviceIntent!=null)  //When Called, stop current service and restart another service
+            {
+                this.stopService(serviceIntent);
+            }
             Intent intent = new Intent(MainActivity.this, LightSensActivity.class);
             startActivity(intent);
+
         });
-        startService(new Intent(this,SensorService.class));
+
     }
     @Override
     protected void onStart(){
@@ -91,9 +95,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         prev_roundedz = 0.0;
         if (sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)){
             sensorListnerRegistered = true;
-            periodicTimer = new Timer();                                      // Reinitialize the timer
-            task_processor = periodicValCheck();                              // Reinitialize the task
-            periodicTimer.schedule(task_processor, 200, sensorPeriod);  // Start the timer with period = sensorPeriod
         }
         else {
             Toast.makeText(this, "Sensor Listener could not be registered!", Toast.LENGTH_SHORT).show();
@@ -105,10 +106,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(sensorListnerRegistered){
             sensorManager.unregisterListener(this);
         }
-        if (task_processor != null) {
-            task_processor.cancel();                                          //timer task is cancelled to avoid leaks
-        }
-        periodicTimer.cancel();                                               // Cancel the entire timer
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -120,19 +117,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             display_sensVal.setText("X:  " + roundedx + "| Y:  " + roundedy + "| Z:  " + roundedz + " m/s^2");
         }
     }
+    private Intent serviceIntent;
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
-    private TimerTask periodicValCheck() {
-        return new TimerTask() {
-            @Override
-            public void run() {  //periodically check if the threshold is exceeded
-                if (Math.abs(prev_roundedz) < threshold) {
-                    for(int i=0; i<1000; i++) {
-                        display_sensVal.setText("Threshold Exceeded!");
-                    }
-                }
-            }
-        };
+    private void StartService(int period,int threshold){
+        if(serviceIntent!=null)                //When Called, stop current service and restart another service
+        {
+            this.stopService(serviceIntent);
+        }
+        serviceIntent = new Intent(this,SensorService.class);
+        serviceIntent.putExtra("sensorPeriod", period);
+        serviceIntent.putExtra("threshold", threshold);
+        serviceIntent.putExtra("type", 0); //0:Accelerometer, 1:Light
+        this.startService(serviceIntent);
     }
+    private Context contextBR = this;
+    private BroadcastReceiver sensorUpdates = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("com.example.broadcast.THRESHOLD")){
+                float data = intent.getFloatExtra("values",0);
+                display_sensVal.setText("Broadcast Received: "+data);
+                Toast.makeText(contextBR, "Broadcast Received!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 }
