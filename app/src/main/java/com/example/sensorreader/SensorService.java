@@ -99,7 +99,7 @@ public class SensorService extends Service implements SensorEventListener {
         return new TimerTask() {
             @Override
             public void run() {  //periodically check if the threshold is exceeded
-                if (Math.abs(sensorVal) > threshold) {
+                if (Math.abs(sensorVal) < threshold) {
                     Log.d("tests", "run: "+sensorVal);
                     notificationManager.notify(2, getNotification("Threshold exceeded! "+sensorVal));
                     broadcastIntent.putExtra("values",sensorVal);

@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -45,8 +46,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             return insets;
         });
     //Initializing Broadcasting
-        IntentFilter filter = new IntentFilter("com.example.broadcast.MY_NOTIFICATION");
-        registerReceiver(sensorUpdates, filter);
+        IntentFilter filter = new IntentFilter("com.example.broadcast.THRESHOLD");
+        registerReceiver(sensorUpdates, filter,RECEIVER_EXPORTED);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);          //Sensor Manager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER); //Sensor
@@ -142,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals("com.example.broadcast.THRESHOLD")){
                 float data = intent.getFloatExtra("values",0);
+                Log.d("cbjhskdkjf", "onReceive: "+data);
                 display_sensVal.setText("Broadcast Received: "+data);
                 Toast.makeText(contextBR, "Broadcast Received!", Toast.LENGTH_SHORT).show();
             }

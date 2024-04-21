@@ -2,6 +2,7 @@ package com.example.sensorreader;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -44,7 +45,8 @@ public class LightSensActivity extends AppCompatActivity implements SensorEventL
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        IntentFilter filter = new IntentFilter("com.example.broadcast.THRESHOLD");
+        registerReceiver(sensorUpdates, filter,RECEIVER_EXPORTED);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);     //Sensor Manager
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);      //Sensor
         display_sensVal  = findViewById(R.id.textView_sensorVal);  //Display
@@ -77,6 +79,8 @@ public class LightSensActivity extends AppCompatActivity implements SensorEventL
 
         // Add_button add clicklistener
         buttonnextActivity.setOnClickListener(v -> {
+            if(serviceIntent!=null)                //When Called, stop current service and restart another service
+                this.stopService(serviceIntent);
             Intent intent = new Intent(LightSensActivity.this, MainActivity.class);
             startActivity(intent);
         });
@@ -119,12 +123,14 @@ public class LightSensActivity extends AppCompatActivity implements SensorEventL
         serviceIntent.putExtra("type", 1); //0:Accelerometer, 1:Light
         this.startService(serviceIntent);
     }
+    private Context contextBR = this;
     private BroadcastReceiver sensorUpdates = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals("com.example.broadcast.THRESHOLD")){
                 float data = intent.getFloatExtra("values",0);
                 display_sensVal.setText("Value : "+data);
+                Toast.makeText(contextBR, "Broadcast Received!", Toast.LENGTH_SHORT).show();
             }
         }
     };
